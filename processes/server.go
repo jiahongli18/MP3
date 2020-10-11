@@ -1,36 +1,38 @@
 package processes
 
 import (
-	"../Utils"
+	"encoding/gob"
 	"fmt"
 	"net"
-	"encoding/gob"
 	"time"
+
+	"../Utils"
 )
 
-//func unicast_receive(source string, state float64) {
-//	fmt.Printf("\nReceived %f from node %s, system time is %s\nPlease enter a command: ", state, source, time.Now().Format("Jan _2 15:04:05.000"))
-//}
-
-func unicast_receive(state float64) {
-	fmt.Printf("\nReceived %f, system time is %s\n", state, time.Now().Format("Jan _2 15:04:05.000"))
+func unicast_receive(state float64, stateQueue []float64) {
+	stateQueue = append(stateQueue, state)
+	if state > 0 {
+		fmt.Printf("\nReceived %f, system time is %s\n", state, time.Now().Format("Jan _2 15:04:05.000"))
+		fmt.Print(stateQueue)
 	}
+}
 
-
-
-func handleConnection(c net.Conn) {
+func handleConnection(c net.Conn, stateQueue []float64) {
+	//var stateQueue [10000]float64
 	for {
 		decoder := gob.NewDecoder(c) //initialize gob decoder
 		state := new(float64)
 		//message := new(Utils.Message)
 		_ = decoder.Decode(state)
-		unicast_receive(*state)
+		unicast_receive(*state, stateQueue)
+
 	}
 	c.Close()
 }
 
 func StartServer(NodeNum string) {
-	_,port := Utils.FetchHostPort(NodeNum)
+	var stateQueue []float64
+	_, port, _ := Utils.FetchHostPort(NodeNum)
 
 	//get port number from user input and listen in on that port for requests
 	PORT := ":" + port
@@ -49,6 +51,6 @@ func StartServer(NodeNum string) {
 		}
 
 		//goroutine for handling requests made to server
-		go handleConnection(c)
+		go handleConnection(c, stateQueue)
 	}
 }
