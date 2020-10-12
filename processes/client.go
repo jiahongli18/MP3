@@ -8,17 +8,12 @@ import (
 	"sync"
 
 	"../Utils"
-
-	//"bufio"
-	//"os"
-	//"strings"
-	"time"
 )
 
 //Reads user command and sends the message with regards to destination and delay bounds
 func Unicast_send(initmsg Utils.Message, n int) {
 	for {
-		for NodeNum := 1; NodeNum <= 3; NodeNum++ {
+		for NodeNum := 1; NodeNum <= n; NodeNum++ {
 			//find the associating host/port according to the user's desired destination #
 			SNum := strconv.Itoa(NodeNum)
 			ip, port, _ := Utils.FetchHostPort(SNum)
@@ -42,7 +37,14 @@ func unicast_send(process string, destination string, initmsg Utils.Message, min
 	encoder.Encode(initmsg)
 	//_ = encoder.Encode()
 
-	fmt.Printf("Sent %f to node %s, system time is %s\n", initmsg.State, process, time.Now().Format("Jan _2 15:04:05.000"))
+	//fmt.Printf("Sent %f to node %s, system time is %s\n", initmsg.State, process, time.Now().Format("Jan _2 15:04:05.000"))
+	decoder := gob.NewDecoder(conn) //initialize gob decoder
+	var updatemsg Utils.Message
+	_ = decoder.Decode(&updatemsg)
+	if updatemsg.State > 0 {
+		fmt.Println("updatemsg is", updatemsg)
+	}
+
 	//set delay
 	groupTest := new(sync.WaitGroup)
 	go Utils.Delay(min_delay, max_delay, groupTest)
