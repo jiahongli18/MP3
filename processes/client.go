@@ -16,23 +16,21 @@ import (
 )
 
 //Reads user command and sends the message with regards to destination and delay bounds
-func Unicast_send(initstate float64, n int) {
+func Unicast_send(initmsg Utils.Message, n int) {
 	for {
-		for NodeNum := 1; NodeNum <= 2; NodeNum++ {
+		for NodeNum := 1; NodeNum <= 3; NodeNum++ {
 			//find the associating host/port according to the user's desired destination #
 			SNum := strconv.Itoa(NodeNum)
 			ip, port, _ := Utils.FetchHostPort(SNum)
 			min_delay, max_delay := Utils.FetchDelay()
-
-			unicast_send(SNum, ip+":"+port, initstate, min_delay, max_delay)
-
+			unicast_send(SNum, ip+":"+port, initmsg, min_delay, max_delay)
 		}
 	}
 
 }
 
 //Sends message to the destination process
-func unicast_send(process string, destination string, state float64, min_delay int, max_delay int) {
+func unicast_send(process string, destination string, initmsg Utils.Message, min_delay int, max_delay int) {
 	//dial to the TCP server using net library
 	conn, err := net.Dial("tcp", destination)
 	if err != nil {
@@ -41,9 +39,10 @@ func unicast_send(process string, destination string, state float64, min_delay i
 	}
 
 	encoder := gob.NewEncoder(conn)
-	_ = encoder.Encode(state)
+	encoder.Encode(initmsg)
+	//_ = encoder.Encode()
 
-	fmt.Printf("Sent %f to node %s, system time is %s\n", state, process, time.Now().Format("Jan _2 15:04:05.000"))
+	fmt.Printf("Sent %f to node %s, system time is %s\n", initmsg.State, process, time.Now().Format("Jan _2 15:04:05.000"))
 	//set delay
 	groupTest := new(sync.WaitGroup)
 	go Utils.Delay(min_delay, max_delay, groupTest)

@@ -9,29 +9,33 @@ import (
 	"../Utils"
 )
 
-func unicast_receive(state float64, stateQueue []float64) {
-	stateQueue = append(stateQueue, state)
-	if state > 0 {
-		fmt.Printf("\nReceived %f, system time is %s\n", state, time.Now().Format("Jan _2 15:04:05.000"))
-		fmt.Print(stateQueue)
+func unicast_receive(msg Utils.Message , pmsg *[]Utils.Message, stateQueue *[]float64) {
+	if msg.State > 0 {
+		fmt.Printf("\nReceived %f, system time is %s\n", msg.State, time.Now().Format("Jan _2 15:04:05.000"))
+		*stateQueue = append(*stateQueue, msg.State)
+		*pmsg = append(*pmsg, msg)
+		fmt.Println(*stateQueue)
+		fmt.Println(*pmsg)
 	}
+
 }
 
-func handleConnection(c net.Conn, stateQueue []float64) {
-	//var stateQueue [10000]float64
+func handleConnection(c net.Conn, stateQueue *[]float64, pmsg *[]Utils.Message) {
 	for {
 		decoder := gob.NewDecoder(c) //initialize gob decoder
-		state := new(float64)
-		//message := new(Utils.Message)
-		_ = decoder.Decode(state)
-		unicast_receive(*state, stateQueue)
+		msg := new(Utils.Message)
 
+		_ = decoder.Decode(msg)
+		unicast_receive(*msg, pmsg, stateQueue)
 	}
 	c.Close()
 }
 
 func StartServer(NodeNum string) {
 	var stateQueue []float64
+	p := &stateQueue
+	var msgs []Utils.Message
+	pmsg := &msgs
 	_, port, _ := Utils.FetchHostPort(NodeNum)
 
 	//get port number from user input and listen in on that port for requests
@@ -51,6 +55,6 @@ func StartServer(NodeNum string) {
 		}
 
 		//goroutine for handling requests made to server
-		go handleConnection(c, stateQueue)
+		go handleConnection(c, p, pmsg)
 	}
 }
