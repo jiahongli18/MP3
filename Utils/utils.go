@@ -75,7 +75,7 @@ func FetchHostPort(destination string) (string, string, float64) {
 }
 
 //parses the min and max delays from the config file
-func FetchDelay() (int, int) {
+func FetchConfig() (int, int, int, int) {
 	f, err := os.Open("./config.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -86,8 +86,10 @@ func FetchDelay() (int, int) {
 	delays := strings.Fields(scanner.Text())
 	min_delay, _ := strconv.Atoi(delays[0])
 	max_delay, _ := strconv.Atoi(delays[1])
+	numNodes, _ := strconv.Atoi(delays[2])
+	numFailures, _ := strconv.Atoi(delays[3])
 	f.Close()
-	return min_delay, max_delay
+	return min_delay, max_delay, numNodes, numFailures
 }
 
 //Simulate network delay by adding an extra layer before sending the message via the TCP channel

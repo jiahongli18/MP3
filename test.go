@@ -51,15 +51,15 @@ func main() {
 	arguments := os.Args
 	NodeNum := arguments[1]
 	_, _, initialState := Utils.FetchHostPort(NodeNum)
-	initmsg := Utils.Message{}
+	//initmsg := Utils.Message{}
 
-	initmsg.State = initialState
- 	initmsg.R = 1
+	//initmsg.State = initialState
+ 	//initmsg.R = 1
 
 	//Starts the server for each process in a goroutine so that it can listen to the dialing
 	go processes.StartServer(NodeNum)
 
 	initialize(NodeNum)
-	processes.Unicast_send(initmsg, 3)
+	processes.Unicast_send(initialState, 2)
 
 }
