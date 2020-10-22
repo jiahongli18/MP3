@@ -2,6 +2,8 @@
   "minDelay": 1000,
   "maxDelay": 2000,
   "host": "127.0.0.1",
+  "defaultPort": "6000",
+  "numOfFaultyNodes": 1,
   "nodes": [
     {
       "number": 1,
