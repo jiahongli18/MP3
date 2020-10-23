@@ -4,10 +4,8 @@ import (
 	"bufio"
 	"encoding/gob"
 	"fmt"
-	"math/rand"
 	"net"
 	"os"
-	"reflect"
 	"strings"
 
 	types "../structs"
@@ -15,6 +13,7 @@ import (
 )
 
 func main() {
+	fmt.Println(utils.FetchFaultyNodes())
 	//Declare a map to be used for storing the client's username and the associating TCP channel.
 	var m = make(map[string]net.Conn)
 
@@ -47,10 +46,8 @@ func startServer(m map[string]net.Conn) {
 	}
 	defer l.Close()
 
-	numOfConnectedNodes := 0
-	numOfNodes := utils.ReadIntFromConfig("numOfNodes")
+	// numOfNodes := utils.ReadIntFromConfig("numOfNodes")
 	numOfFaultyNodes := utils.ReadIntFromConfig("numOfFaultyNodes")
-	roundNum := 1
 
 	fmt.Println("There are this many faulty nodes: ")
 	fmt.Println(numOfFaultyNodes)
@@ -63,50 +60,10 @@ func startServer(m map[string]net.Conn) {
 			return
 		}
 
-		// netData, _ := bufio.NewReader(c).ReadString('\n')
-		// username = netData
 		m[username] = c
-
-		fmt.Println("Client connected")
-		numOfConnectedNodes += 1
-
-		if numOfConnectedNodes == numOfNodes {
-			fmt.Println("everyone is connected")
-			setFaultyNodes(c, numOfFaultyNodes, numOfNodes, roundNum, m)
-		}
 
 		//Call a goroutine to handle the communication so that the server can support handling multiple concurrent clients.
 		go handleConnection(c, m)
-	}
-}
-
-func MapRandomKeyGet(mapI interface{}) interface{} {
-	keys := reflect.ValueOf(mapI).MapKeys()
-	fmt.Print(keys)
-	return keys[rand.Intn(len(keys))].Interface()
-}
-
-//use randomization to find which nodes fail ( need numOfFaultyNodes amount ex. if numOfFaultyNodes is 2, then let's say nodes 1 and 2 fail)
-func setFaultyNodes(c net.Conn, numOfFaultyNodes int, numOfNodes int, roundNum int, m map[string]net.Conn) {
-	var faultyNodes []string
-
-	for i := 0; i < numOfFaultyNodes; i++ {
-		faultyNodes = append(faultyNodes, MapRandomKeyGet(m).(string))
-	}
-
-	fmt.Println(faultyNodes)
-
-	for key, receiverChannel := range m {
-		isFaulty := false
-		for i := 0; i < len(faultyNodes); i++ {
-			if key == faultyNodes[i] {
-				fmt.Print(key)
-				isFaulty = true
-			}
-		}
-		encoder := gob.NewEncoder(receiverChannel)
-		msg := types.Message{0, 0, isFaulty, true}
-		encoder.Encode(msg)
 	}
 }
 
@@ -125,7 +82,7 @@ func handleConnection(c net.Conn, m map[string]net.Conn) {
 func exitAllClients(m map[string]net.Conn) {
 	for _, receiverChannel := range m {
 		encoder := gob.NewEncoder(receiverChannel)
-		msg := types.Message{0, 0, false, true}
+		msg := types.Message{"0", 0, false}
 		encoder.Encode(msg)
 	}
 }
