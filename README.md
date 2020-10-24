@@ -39,28 +39,12 @@ In the controller, we have two goroutines: `startServer()` and `exit()`
 
 * In utils.go, we abstract helper functions for each nodes to fetch host and ports, nodeNumbers, faultyNodeNumbers, mindelay, and maxdelay.
 
-* We have three structs as Config, Node, and Message with explicit fields listed below. 
-type Config struct {
-	MinDelay         int      `json:"minDelay"`
-	MaxDelay         int      `json:"maxDelay"`
-	Host             string   `json:"host"`
-	DefaultPort      string   `json:"defaultPort"`
-	NumOfFaultyNodes int      `json:"numOfFaultyNodes"`
-	FaultyNodes      []string `json:"faultyNodes"`
-	Nodes            []Node   `json:"nodes"`
-}
+* We have three structs as Config, Node, and Message
+Congif stores all the values from JSON, including MinDelay, MaxDelay, Host, DefaultPort,     NumOfFaultyNodes, FaultyNodes, Nodes. 
 
-type Node struct {
-	Number string  `json:"number"`
-	Port   string  `json:"port"`
-	Value  float64 `json:"value"`
-}
+Node contains Number, Port and Value for each nodes.
 
-type Message struct {
-	Round  string
-	Value  float64
-	IsExit bool
-}
+Message includes round, value, and isExit (a boolean variable to detect the exit signal)/
 
 ## Chanllenges and Bottleneck
 We cannot figure out how to increment the round number correctly. Once the round number is added into the message, the goroutines seem to go wrong for unknown reasons. We have to halt our attempt and fix it later. 
