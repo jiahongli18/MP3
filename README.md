@@ -27,7 +27,7 @@ In the controller, we have two goroutines: `startServer()` and `exit()`
 
 * `exit()` is used to determine when the approximate consensus is achieved. If the state difference between each nodes is not above 0.001, then a channel is used to communicate this information with the main thread. Then the main thread sends the signal to all other TCP channels to terminates those, and finally terminates itself.
 
-* Like MP2, the nodes in main.go act both like servers and clients which communicate with each other. We start two goroutines within main.go The first one is called `startServer()` and the second is `Listen()`
+Like MP2, the nodes in main.go act both like servers and clients which communicate with each other. We start two goroutines within main.go The first one is called `startServer()` and the second is `Listen()`
 
 * `startServer()` creates the TCP connection and listen on provided port for requests. It gets the number of faulty ndoes and the number of nodes, and it makes an array called statequeue which stores the floats received from n-f nodes. For each connection, we call a goroutine to handle the communication so that the each node can decode the message received from other nodes and calculate the average of the n-f states it receives this round. 
 
@@ -40,11 +40,7 @@ In the controller, we have two goroutines: `startServer()` and `exit()`
 * In utils.go, we abstract helper functions for each nodes to fetch host and ports, nodeNumbers, faultyNodeNumbers, mindelay, and maxdelay.
 
 * We have three structs as Config, Node, and Message
-Congif stores all the values from JSON, including MinDelay, MaxDelay, Host, DefaultPort,     NumOfFaultyNodes, FaultyNodes, Nodes. 
-
-Node contains Number, Port and Value for each nodes.
-
-Message includes round, value, and isExit (a boolean variable to detect the exit signal)/
+Congif stores all the values from JSON, including MinDelay, MaxDelay, Host, DefaultPort,     NumOfFaultyNodes, FaultyNodes, Nodes. Node contains Number, Port and Value for each nodes.Message includes round, value, and isExit (a boolean variable to detect the exit signal)
 
 ## Chanllenges and Bottleneck
 We cannot figure out how to increment the round number correctly. Once the round number is added into the message, the goroutines seem to go wrong for unknown reasons. We have to halt our attempt and fix it later. 
